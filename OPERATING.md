@@ -53,12 +53,25 @@ The admin is a **separate deployment** served at `admin.<site-domain>` — never
 a path on the public static site (that would reintroduce a server surface on
 the site we hardened).
 
-On Vercel (or any serverless host):
+On Vercel:
 
-1. New project from this repo.
-2. Set the env vars above as project secrets.
-3. Add the domain `admin.writenow.berlin`; point DNS (CNAME) at the host.
-4. The app serves the UI and `/api/*` from the same deployment.
+1. New project from this repo (`wbhoneywill/ai-content-admin`).
+2. **Build settings:** no build step. Framework preset "Other"; leave the build
+   command empty; output is the static `public/` dir + the `api/` function.
+   `vercel.json` already wires `/api/*` → the serverless function and serves
+   `public/` from the CDN.
+3. **Environment variables** (Project → Settings → Environment Variables), set
+   the vars from the table above: `AUTH_PASSWORD`, `AUTH_SECRET`,
+   `GITHUB_TOKEN`, `ANTHROPIC_API_KEY` (and optionally `ANTHROPIC_MODEL`).
+   Do NOT set `SECURE_COOKIES=false` in production (HTTPS is required).
+4. Deploy. The project gets a URL like `ai-content-admin.vercel.app`; use that
+   as the admin URL for now.
+5. **Later**, add the domain `admin.writenow.berlin` to this project and point
+   DNS (CNAME) at Vercel. The static site stays on its own project/domain.
+
+> The admin runs as a Vercel serverless function (`api/index.ts` mounts the
+> framework-agnostic handler from `buildApp()`); the UI is static files in
+> `public/`. Same deployment, isolated from the public site's project.
 
 The admin sends `X-Robots-Tag: noindex` and the UI carries a `noindex` meta tag,
 so it never shows up in search. For extra hardening it can be paused/undeployed

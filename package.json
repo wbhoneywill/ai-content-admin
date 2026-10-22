@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
-  "description": "Conversational AI content admin for the WriteNow Berlin static site. Proposes typed content edits, validates them, and commits to a preview branch for review before publishing.",
+  "description": "Conversational AI content admin for git-backed static sites. Proposes typed content edits, validates them, and commits to a preview branch for review before publishing.",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
