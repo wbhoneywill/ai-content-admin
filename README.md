@@ -15,9 +15,9 @@ second site is configuration, not a rewrite.
 
 Spec: see `.kiro/specs/ai-content-admin/` in the WriteNow content repo.
 
-## Status — Milestone 2 (admin core) complete
+## Status — Milestones 2–3 complete
 
-This repo currently contains the **core engine** (no UI or live LLM yet):
+This repo contains the **core engine + intelligence layer** (no UI yet):
 
 - **Content model** (`src/content-model.ts`) — the Zod schemas, mirrored from
   the content repo, for validating and editing the JSON content files.
@@ -36,7 +36,22 @@ This repo currently contains the **core engine** (no UI or live LLM yet):
   `loadWorkingTree`, `commit` (to preview), `publish` (merge→main, align
   preview), `undoLast`, `checkDivergence`.
 
-41 unit tests cover all of the above with no network access.
+**Intelligence layer (M3):**
+
+- **Profile** (`src/profile.ts`) — the site-agnostic seam. A profile supplies
+  the content repo, domains, and exposed operations. WriteNow is the first
+  profile; adding a site is a new profile, not an engine change.
+- **LLM adapter** (`src/llm/`) — `interpret(prompt, context) → operation |
+  clarify | decline`, provider-agnostic. Includes an Anthropic implementation
+  using tool-calling constrained to the operation set (tools built from the
+  operations' Zod schemas). Providers are swappable; tests use a mock.
+- **Orchestrator** (`src/orchestrator.ts`) — the propose → approve flow: load
+  working tree → interpret → validate args → apply → validation gate → hold a
+  pending proposal (summary + blast radius). Commits to `preview` only on
+  explicit approve; reject discards. Nothing reaches the repo without approval.
+
+54 unit tests cover all of the above with no network access (GitHub and the LLM
+are both mocked).
 
 ## Design guarantees
 
@@ -44,7 +59,7 @@ This repo currently contains the **core engine** (no UI or live LLM yet):
   repo.
 - Nothing commits without owner approval (enforced by the orchestrator, M3).
 - Destructive ops (`removePost`, `removePerson`) require an explicit `confirm`
-  and report their blast radius; "remove" defaults to the reversible *hide*.
+  and report their blast radius; "remove" defaults to the reversible _hide_.
 - Every proposed change is schema-validated before it can be committed.
 
 ## Develop
@@ -58,6 +73,5 @@ npm run lint
 
 ## Next (per the spec)
 
-- **M3**: LLM adapter (prompt → operation, provider-agnostic) + propose/approve
-  orchestration API.
-- **M4**: auth, admin UI, preview/publish environment wiring, end-to-end.
+- **M4**: HTTP API (propose/approve/publish endpoints), auth adapter, admin UI,
+  preview/publish environment wiring (`admin.<domain>` subdomain), end-to-end.
