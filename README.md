@@ -15,9 +15,11 @@ second site is configuration, not a rewrite.
 
 Spec: see `.kiro/specs/ai-content-admin/` in the WriteNow content repo.
 
-## Status — Milestones 2–3 complete
+## Status — Milestones 2–4 complete (feature-complete v1)
 
-This repo contains the **core engine + intelligence layer** (no UI yet):
+A working admin: engine + intelligence + auth + HTTP API + UI. See
+[`OPERATING.md`](./OPERATING.md) for configuration, deploy, and the editing
+flow.
 
 - **Content model** (`src/content-model.ts`) — the Zod schemas, mirrored from
   the content repo, for validating and editing the JSON content files.
@@ -50,8 +52,22 @@ clarify | decline`, provider-agnostic. Includes an Anthropic implementation
   pending proposal (summary + blast radius). Commits to `preview` only on
   explicit approve; reject discards. Nothing reaches the repo without approval.
 
-54 unit tests cover all of the above with no network access (GitHub and the LLM
-are both mocked).
+**Product layer (M4):**
+
+- **Auth** (`src/auth/`) — pluggable adapter; v1 is a single-password sign-in
+  with an HMAC-signed, httpOnly, expiring session cookie.
+- **HTTP API** (`src/http/`) — framework-agnostic over Web Request/Response
+  (Vercel/Node/any): login, logout, status, propose, approve, reject, publish,
+  undo. Every editing route requires a session.
+- **GitHub REST client** (`src/git/github-rest.js`) — the real GitHubClient over
+  the Git Data API (atomic tree-commits, merge, revert, ancestry check).
+- **Admin UI** (`public/`) — dependency-free SPA: login, chat prompt, proposal
+  panel (summary + blast radius + Approve/Discard), Publish/Undo, status.
+- **Server + app wiring** (`src/server.ts`, `src/app.ts`, `src/config.ts`) —
+  serves the UI + API; env-validated config; provider/profile selection.
+
+75 unit + integration tests, including an end-to-end login→propose→approve→
+publish→undo flow, all with GitHub and the LLM mocked (no network).
 
 ## Design guarantees
 
@@ -71,7 +87,8 @@ npm run typecheck
 npm run lint
 ```
 
-## Next (per the spec)
+## Next
 
-- **M4**: HTTP API (propose/approve/publish endpoints), auth adapter, admin UI,
-  preview/publish environment wiring (`admin.<domain>` subdomain), end-to-end.
+v1 is feature-complete. Possible follow-ups: image upload UI for `swapPhoto`,
+more operations (new profiles/collections), richer diff preview, a second site
+profile to prove the seam, and hardening (rate limiting, GitHub App auth).
