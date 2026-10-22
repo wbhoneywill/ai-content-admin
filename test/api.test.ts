@@ -94,7 +94,7 @@ describe("HTTP API", () => {
     const approveRes = await ctx.handle(
       post("/api/approve", { id: proposal.id }, cookie),
     );
-    expect((await approveRes.json()).ok).toBe(true);
+    expect(((await approveRes.json()) as { ok: boolean }).ok).toBe(true);
 
     expect(
       JSON.parse(
@@ -118,7 +118,7 @@ describe("HTTP API", () => {
     await ctx.handle(post("/api/approve", { id: proposal.id }, cookie));
 
     const pub = await ctx.handle(post("/api/publish", undefined, cookie));
-    expect((await pub.json()).ok).toBe(true);
+    expect(((await pub.json()) as { ok: boolean }).ok).toBe(true);
     expect(
       JSON.parse(
         ctx.gh.filesAt("main").get("src/content/people/esin-alpogan.json")!,
