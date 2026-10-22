@@ -13,4 +13,17 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // The browser admin UI (served as-is, no bundler).
+    files: ["public/**/*.js"],
+    languageOptions: {
+      globals: {
+        document: "readonly",
+        window: "readonly",
+        fetch: "readonly",
+        confirm: "readonly",
+        Headers: "readonly",
+      },
+    },
+  },
 );

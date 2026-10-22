@@ -1,0 +1,178 @@
+:root {
+  --bg: #fff;
+  --text: #222;
+  --muted: #767676;
+  --border: #e4e4e4;
+  --accent: #ffbb1d;
+  --rose: #c38d9e;
+  --ok: #1a7f37;
+  --err: #b42318;
+  --panel: #f7f7f8;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font:
+    16px/1.55 "Libre Franklin",
+    system-ui,
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+button.primary:disabled {
+  background: var(--panel);
+  border-color: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+button.ghost {
+  background: transparent;
+}
+.muted {
+  color: var(--muted);
+}
+.error {
+  color: var(--err);
+  min-height: 1.2em;
+}
+
+/* login */
+.centered {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+.card {
+  width: min(360px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.card h1 {
+  margin: 0;
+}
+.card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+.card input {
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+/* topbar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.pill {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.pill.staged {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+/* layout / chat */
+.layout {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.msg {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  max-width: 85%;
+}
+.msg.user {
+  align-self: flex-end;
+  background: var(--panel);
+}
+.msg.bot {
+  align-self: flex-start;
+  border: 1px solid var(--border);
+}
+.msg.bot.error {
+  border-color: var(--err);
+}
+.proposal {
+  align-self: stretch;
+  max-width: 100%;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 1rem;
+}
+.proposal h3 {
+  margin: 0 0 0.4rem;
+}
+.proposal ul {
+  margin: 0.4rem 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.proposal .actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.proposal.confirm {
+  border-color: var(--err);
+}
+.prompt {
+  display: flex;
+  gap: 0.5rem;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding-top: 0.5rem;
+}
+.prompt textarea {
+  flex: 1;
+  resize: vertical;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+}

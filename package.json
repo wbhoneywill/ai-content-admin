@@ -5,6 +5,8 @@
   "private": true,
   "description": "Conversational AI content admin for the WriteNow Berlin static site. Proposes typed content edits, validates them, and commits to a preview branch for review before publishing.",
   "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
@@ -20,6 +22,7 @@
     "@types/node": "^22.10.5",
     "eslint": "^9.18.0",
     "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0",
     "vitest": "^2.1.8"

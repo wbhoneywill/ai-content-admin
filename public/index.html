@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Content Admin</title>
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <!-- Login view -->
+    <main id="login-view" class="centered" hidden>
+      <form id="login-form" class="card">
+        <h1>Content Admin</h1>
+        <p class="muted">Sign in to edit the site.</p>
+        <label>
+          Password
+          <input
+            type="password"
+            id="password"
+            autocomplete="current-password"
+            required
+          />
+        </label>
+        <button type="submit">Sign in</button>
+        <p id="login-error" class="error" role="alert"></p>
+      </form>
+    </main>
+
+    <!-- App view -->
+    <div id="app-view" hidden>
+      <header class="topbar">
+        <strong id="site-name">Content Admin</strong>
+        <div class="topbar-actions">
+          <span id="status-pill" class="pill"></span>
+          <a id="preview-link" href="#" target="_blank" rel="noopener" hidden
+            >View preview ↗</a
+          >
+          <button id="publish-btn" class="primary" disabled>Publish</button>
+          <button id="logout-btn" class="ghost">Sign out</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="chat" aria-label="Conversation">
+          <div id="messages" class="messages"></div>
+          <form id="prompt-form" class="prompt">
+            <textarea
+              id="prompt"
+              rows="2"
+              placeholder='Describe a change — e.g. "hide the profile for Esin Alpogan" or "add a blog post titled …"'
+            ></textarea>
+            <button type="submit" id="send-btn">Send</button>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
