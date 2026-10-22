@@ -1,12 +1,19 @@
-# WriteNow Berlin — AI Content Admin
+# AI Content Admin
 
-A conversational admin for the [WriteNow Berlin static site](https://github.com/wbhoneywill/writenowberlin).
-A non-developer describes a change in plain language; an AI agent maps it to one
-of a fixed set of typed content operations, proposes it with a plain-English
-summary, and — after approval — commits to a `preview` branch (staging). The
-owner publishes when ready, merging to `main` (production).
+A conversational admin for git-backed static sites. A non-developer describes a
+change in plain language; an AI agent maps it to one of a fixed set of typed
+content operations, proposes it with a plain-English summary, and — after
+approval — commits to a `preview` branch (staging). The owner publishes when
+ready, merging to `main` (production).
 
-Spec: see `.kiro/specs/ai-content-admin/` in the content repo.
+The architecture is **site-agnostic**: the operation engine, validation gate,
+and git service are generic. Each site plugs in a **profile** — its content
+model (schemas) and the operation set it exposes. The first profile is the
+[WriteNow Berlin static site](https://github.com/wbhoneywill/writenowberlin);
+the WriteNow-specific pieces are being factored behind that profile seam so a
+second site is configuration, not a rewrite.
+
+Spec: see `.kiro/specs/ai-content-admin/` in the WriteNow content repo.
 
 ## Status — Milestone 2 (admin core) complete
 
