@@ -42,7 +42,7 @@ This repo contains the **core engine + intelligence layer** (no UI yet):
   the content repo, domains, and exposed operations. WriteNow is the first
   profile; adding a site is a new profile, not an engine change.
 - **LLM adapter** (`src/llm/`) — `interpret(prompt, context) → operation |
-  clarify | decline`, provider-agnostic. Includes an Anthropic implementation
+clarify | decline`, provider-agnostic. Includes an Anthropic implementation
   using tool-calling constrained to the operation set (tools built from the
   operations' Zod schemas). Providers are swappable; tests use a mock.
 - **Orchestrator** (`src/orchestrator.ts`) — the propose → approve flow: load
