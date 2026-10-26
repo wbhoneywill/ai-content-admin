@@ -51,14 +51,23 @@ describe("toInterpretation", () => {
 });
 
 describe("AnthropicAdapter (mocked fetch)", () => {
+  // URL-aware mock: /v1/models returns a model list (for auto-resolution),
+  // /v1/messages returns the tool_use response.
   function mockFetch(toolName: string, input: unknown): typeof fetch {
-    return (async () =>
-      new Response(
+    return (async (url: string) => {
+      if (url.includes("/v1/models")) {
+        return new Response(
+          JSON.stringify({ data: [{ id: "claude-3-7-sonnet-latest" }] }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      return new Response(
         JSON.stringify({
           content: [{ type: "tool_use", name: toolName, input }],
         }),
         { status: 200, headers: { "content-type": "application/json" } },
-      )) as unknown as typeof fetch;
+      );
+    }) as unknown as typeof fetch;
   }
 
   it("returns an operation interpretation from a tool_use response", async () => {
@@ -90,9 +99,48 @@ describe("AnthropicAdapter (mocked fetch)", () => {
       new Response("rate limited", { status: 429 })) as unknown as typeof fetch;
     const adapter = new AnthropicAdapter({
       apiKey: "test",
+      model: "claude-3-7-sonnet-latest", // skip auto-resolution; test the messages call
       operations: registry,
       fetchImpl: failing,
     });
     await expect(adapter.interpret("x", ctx)).rejects.toThrow(/429/);
+  });
+
+  it("auto-resolves the newest Sonnet when no model is configured", async () => {
+    const calls: string[] = [];
+    const fetchImpl = (async (url: string) => {
+      calls.push(url);
+      if (url.includes("/v1/models")) {
+        return new Response(
+          JSON.stringify({
+            data: [
+              { id: "claude-opus-4-1" },
+              { id: "claude-sonnet-4-5-20991231" },
+              { id: "claude-haiku-4" },
+            ],
+          }),
+          { status: 200 },
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          content: [
+            { type: "tool_use", name: "decline", input: { reason: "x" } },
+          ],
+        }),
+        { status: 200 },
+      );
+    }) as unknown as typeof fetch;
+
+    const adapter = new AnthropicAdapter({
+      apiKey: "test",
+      operations: registry,
+      fetchImpl,
+    });
+    await adapter.interpret("x", ctx);
+    // Picked the sonnet id and used it in the messages request.
+    const messagesCall = calls.find((c) => c.includes("/v1/messages"));
+    expect(messagesCall).toBeTruthy();
+    expect(calls.some((c) => c.includes("/v1/models"))).toBe(true);
   });
 });

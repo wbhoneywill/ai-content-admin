@@ -35,20 +35,50 @@ function formatContext(context: InterpretContext): string {
 
 export class AnthropicAdapter implements LLMAdapter {
   readonly id = "anthropic";
-  private model: string;
+  private configuredModel: string | null;
+  private resolvedModel: string | null = null;
   private fetchImpl: typeof fetch;
   private apiBase: string;
 
   constructor(private opts: AnthropicOptions) {
-    this.model = opts.model ?? "claude-sonnet-4-20250514";
+    // If no model is configured, resolve one from the account's /v1/models
+    // (model IDs are dated and vary by account, so hardcoding 404s).
+    this.configuredModel = opts.model ?? null;
     this.fetchImpl = opts.fetchImpl ?? fetch;
     this.apiBase = opts.apiBase ?? "https://api.anthropic.com";
+  }
+
+  /** The model to use: the configured one, else the newest Sonnet available. */
+  private async resolveModel(): Promise<string> {
+    if (this.configuredModel) return this.configuredModel;
+    if (this.resolvedModel) return this.resolvedModel;
+
+    const res = await this.fetchImpl(`${this.apiBase}/v1/models?limit=100`, {
+      headers: {
+        "x-api-key": this.opts.apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+    });
+    if (!res.ok) {
+      // Fall back to a widely-available alias if listing fails.
+      this.resolvedModel = "claude-3-7-sonnet-latest";
+      return this.resolvedModel;
+    }
+    const data = (await res.json()) as { data: Array<{ id: string }> };
+    const ids = data.data.map((m) => m.id);
+    // Models API lists newest first; prefer the newest Sonnet, else newest.
+    this.resolvedModel =
+      ids.find((id) => id.includes("sonnet")) ??
+      ids[0] ??
+      "claude-3-7-sonnet-latest";
+    return this.resolvedModel;
   }
 
   async interpret(
     prompt: string,
     context: InterpretContext,
   ): Promise<Interpretation> {
+    const model = await this.resolveModel();
     const tools = buildTools(this.opts.operations).map((t) => ({
       name: t.name,
       description: t.description,
@@ -63,7 +93,7 @@ export class AnthropicAdapter implements LLMAdapter {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: this.model,
+        model,
         max_tokens: 1024,
         system: `${SYSTEM_PROMPT}\n\n${formatContext(context)}`,
         tool_choice: { type: "any" },
