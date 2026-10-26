@@ -30,5 +30,3 @@ export default async function handle(req: Request): Promise<Response> {
     });
   }
 }
-
-export const config = { runtime: "nodejs" };
