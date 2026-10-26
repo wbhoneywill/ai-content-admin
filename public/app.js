@@ -139,7 +139,15 @@ $("#login-form").addEventListener("submit", async (e) => {
   });
   if (ok) {
     show("app");
-    await refreshStatus();
+    // Status is best-effort; never let it bounce the user back to login.
+    try {
+      await refreshStatus();
+    } catch (err) {
+      addMessage(
+        "bot",
+        "Signed in. (Status check failed: " + err.message + ")",
+      );
+    }
   } else {
     $("#login-error").textContent = data.error ?? "Sign in failed.";
   }
@@ -159,13 +167,16 @@ $("#logout-btn").addEventListener("click", async () => {
   show("login");
 });
 
-// On load, check whether we already have a session.
+// On load, show login by default, then upgrade to the app if a session exists.
+show("login");
 (async () => {
-  const { ok } = await api("/api/status");
-  if (ok) {
-    show("app");
-    await refreshStatus();
-  } else {
-    show("login");
+  try {
+    const { ok } = await api("/api/status");
+    if (ok) {
+      show("app");
+      await refreshStatus();
+    }
+  } catch {
+    // stay on login
   }
 })();
