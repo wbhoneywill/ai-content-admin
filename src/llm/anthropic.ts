@@ -96,7 +96,10 @@ export class AnthropicAdapter implements LLMAdapter {
         model,
         max_tokens: 1024,
         system: `${SYSTEM_PROMPT}\n\n${formatContext(context)}`,
-        tool_choice: { type: "any" },
+        // "auto" is supported by all tool-capable models (unlike "any", which
+        // some models reject). The system prompt insists on always calling a
+        // tool; if the model still replies with text, we treat it as a decline.
+        tool_choice: { type: "auto" },
         tools,
         messages: [{ role: "user", content: prompt }],
       }),
