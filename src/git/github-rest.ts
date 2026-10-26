@@ -58,15 +58,17 @@ export class GitHubRestClient implements GitHubClient {
   }
 
   async listFiles(ref: string, prefix: string): Promise<RepoFile[]> {
-    // Get the full tree recursively, then fetch blobs under the prefix.
+    // One tree call returns every path+SHA; then fetch blobs in parallel
+    // batches (fetching ~150 blobs sequentially is slow enough to hit the
+    // function timeout -> 504).
     const tree = await this.gh<{
       tree: Array<{ path: string; type: string; sha: string }>;
     }>(`/git/trees/${ref}?recursive=1`);
     const blobs = tree.tree.filter(
       (t) => t.type === "blob" && t.path.startsWith(prefix),
     );
-    const files: RepoFile[] = [];
-    for (const b of blobs) {
+
+    const fetchBlob = async (b: { path: string; sha: string }) => {
       const blob = await this.gh<{ content: string; encoding: string }>(
         `/git/blobs/${b.sha}`,
       );
@@ -74,7 +76,14 @@ export class GitHubRestClient implements GitHubClient {
         blob.encoding === "base64"
           ? Buffer.from(blob.content, "base64").toString("utf8")
           : blob.content;
-      files.push({ path: b.path, content });
+      return { path: b.path, content };
+    };
+
+    const CONCURRENCY = 16;
+    const files: RepoFile[] = [];
+    for (let i = 0; i < blobs.length; i += CONCURRENCY) {
+      const batch = blobs.slice(i, i + CONCURRENCY);
+      files.push(...(await Promise.all(batch.map(fetchBlob))));
     }
     return files;
   }

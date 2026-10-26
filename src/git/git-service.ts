@@ -32,11 +32,23 @@ export class GitService {
     this.main = opts.mainBranch ?? "main";
   }
 
-  /** Read the current content files from `preview` into a FileMap. */
+  /**
+   * Read the current content files from `preview` into a FileMap. Cached by the
+   * branch SHA within a warm function instance, so repeated calls (status,
+   * propose) don't refetch ~150 blobs every time. The cache is invalidated
+   * automatically whenever the branch SHA changes (after a commit/publish).
+   */
+  private cache: { sha: string; files: FileMap } | null = null;
+
   async loadWorkingTree(): Promise<FileMap> {
     const sha = await this.gh.getBranchSha(this.preview);
+    if (this.cache && this.cache.sha === sha) {
+      return new Map(this.cache.files); // defensive copy
+    }
     const files = await this.gh.listFiles(sha, CONTENT_PREFIX);
-    return new Map(files.map((f) => [f.path, f.content]));
+    const map = new Map(files.map((f) => [f.path, f.content]));
+    this.cache = { sha, files: new Map(map) };
+    return map;
   }
 
   /**
