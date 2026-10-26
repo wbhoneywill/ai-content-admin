@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "description": "Conversational AI content admin for git-backed static sites. Proposes typed content edits, validates them, and commits to a preview branch for review before publishing.",
   "scripts": {
     "dev": "tsx watch src/server.ts",
