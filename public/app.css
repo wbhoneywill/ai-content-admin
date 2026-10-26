@@ -12,6 +12,11 @@
 * {
   box-sizing: border-box;
 }
+/* The HTML `hidden` attribute must win over element display rules
+   (e.g. .centered sets display:grid, which would otherwise override it). */
+[hidden] {
+  display: none !important;
+}
 body {
   margin: 0;
   font:
