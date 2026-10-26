@@ -58,6 +58,15 @@ export function createApi(deps: ApiDeps) {
   }
 
   return async function handle(req: Request): Promise<Response> {
+    try {
+      return await route(req);
+    } catch (e) {
+      // Safety net: any uncaught error becomes a readable JSON 500.
+      return json({ error: (e as Error).message }, 500);
+    }
+  };
+
+  async function route(req: Request): Promise<Response> {
     const url = new URL(req.url);
     const path = url.pathname;
     const method = req.method.toUpperCase();
@@ -109,8 +118,12 @@ export function createApi(deps: ApiDeps) {
       const { prompt } = await readJson(req);
       if (typeof prompt !== "string" || prompt.trim() === "")
         return json({ error: "Missing prompt" }, 400);
-      const result = await orchestrator.propose(prompt);
-      return json(result);
+      try {
+        const result = await orchestrator.propose(prompt);
+        return json(result);
+      } catch (e) {
+        return json({ error: (e as Error).message }, 502);
+      }
     }
 
     if (path === "/api/approve" && method === "POST") {
@@ -145,5 +158,5 @@ export function createApi(deps: ApiDeps) {
     }
 
     return json({ error: "Not found" }, 404);
-  };
+  }
 }
